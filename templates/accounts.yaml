@@ -10,6 +10,15 @@ Resources:
   # 1. Detach or remove the following user resources: login profile, attached
   #    MFA device, access-keys, ssh-keys, and policies.
   # 2. Detach the user from all groups.
+  AWSIAMPhccpAutodeployUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: phccp.autodeploy@sagebase.org
+      Groups:
+        - !Ref AWSIAMCodeDeployGroup
+      LoginProfile:
+        Password: !Ref InitNewUserPassword
+        PasswordResetRequired: true
   AWSIAMRebeccaElyanowUser:
     Type: 'AWS::IAM::User'
     Properties:
@@ -302,6 +311,11 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/job-function/Billing
         - !Ref AWSIAMOrganizationsFullAccessPolicy
+  AWSIAMCodeDeployGroup:
+    Type: 'AWS::IAM::Group'
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCodeDeployFullAccess
   # policy to enforce MFA
   AWSIAMEnforceMfaPolicy:
     Type: 'AWS::IAM::ManagedPolicy'
