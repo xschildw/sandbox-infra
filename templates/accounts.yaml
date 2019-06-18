@@ -13,7 +13,7 @@ Resources:
   AWSIAMPhccpAutodeployUser:
     Type: 'AWS::IAM::User'
     Properties:
-      UserName: phccp.autodeploy@sagebase.org
+      UserName: thomas.schaffter+phccp@sagebase.org
       Groups:
         - !Ref AWSIAMCodeDeployGroup
       LoginProfile:
