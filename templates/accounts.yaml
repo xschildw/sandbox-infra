@@ -16,6 +16,13 @@ Resources:
       UserName: thomas.schaffter+phccp@sagebase.org
       Groups:
         - !Ref AWSIAMCodeDeployGroup
+  AWSIAMBrianWhiteUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: brian.white@sagebase.org
+      Groups:
+        - !Ref AWSIAMAllUsersGroup
+        - !Ref AWSIAMDeveloperUsersGroup
       LoginProfile:
         Password: !Ref InitNewUserPassword
         PasswordResetRequired: true
@@ -211,16 +218,23 @@ Resources:
       LoginProfile:
         Password: !Ref InitNewUserPassword
         PasswordResetRequired: true
-  # temporary user for MSSM to transfer files to Sage.
-  # console access is disabled, api key to allow access to MSSM bucket
-  AWSIAMMssmUser:
+  AWSIAMJamesEddyUser:
     Type: 'AWS::IAM::User'
     Properties:
-      UserName: mssm@sagebase.org
-  AWSIAMMssmUserAccessKey:
+      UserName: james.eddy@sagebase.org
+      Groups:
+        - !Ref AWSIAMAllUsersGroup
+        - !Ref AWSIAMDeveloperUsersGroup
+      LoginProfile:
+        Password: !Ref InitNewUserPassword
+        PasswordResetRequired: true
+  # for deployments from Sage-Bionetworks/PHCCollaborationPortal repo
+  PhccpServiceUser:
+    Type: 'AWS::IAM::User'
+  PhccpServiceUserAccessKey:
     Type: 'AWS::IAM::AccessKey'
     Properties:
-      UserName: !Ref AWSIAMMssmUser
+      UserName: !Ref PhccpServiceUser
   AWSIAMDeveloperUsersGroup:
     Type: 'AWS::IAM::Group'
     Properties:
@@ -229,6 +243,24 @@ Resources:
         - arn:aws:iam::aws:policy/IAMReadOnlyAccess
         - !Ref AWSIAMDynamoDenyDeletePolicy
         - !Ref AWSIAMRdsDenyDeletePolicy
+        - arn:aws:iam::aws:policy/AWSCodeDeployFullAccess
+  CodeDeployServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              AWS:
+                - !GetAtt PhccpServiceUser.Arn
+                - !GetAtt AWSIAMThomasSchaffterUser.Arn
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCodeDeployFullAccess
   AWSIAMAdminRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -423,11 +455,15 @@ Outputs:
     Value: !Ref AWSIAMEnforceMfaPolicy
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-EnforceMfaPolicy'
-  AWSIAMMssmUserAccessKey:
-    Value: !Ref AWSIAMMssmUserAccessKey
+  PhccpServiceUserAccessKey:
+    Value: !Ref PhccpServiceUserAccessKey
     Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-MssmUserAccessKey'
-  AWSIAMMssmSecretUserAccessKey:
-    Value: !GetAtt AWSIAMMssmUserAccessKey.SecretAccessKey
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-PhccpServiceUserAccessKey'
+  PhccpServiceUserSecretAccessKey:
+    Value: !GetAtt PhccpServiceUserAccessKey.SecretAccessKey
     Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-MssmUserSecretAccessKey'
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-PhccpServiceUserSecretAccessKey'
+  CodeDeployServiceRoleArn:
+    Value: !GetAtt CodeDeployServiceRole.Arn
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-CodeDeployServiceRoleArn'
