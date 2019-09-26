@@ -511,6 +511,11 @@ Resources:
               - 'iam:ListUsers'
               - 'iam:GetAccountSummary'
             Resource: '*'
+          - Sid: AllowUsersToGetAccountPasswordPolicy
+            Effect: Allow
+            Action:
+              - 'iam:GetAccountPasswordPolicy'
+            Resource: "*"
           - Sid: AllowIndividualUserToSeeAndManageOnlyTheirOwnAccountInformation
             Effect: Allow
             Action:
@@ -519,7 +524,6 @@ Resources:
               - 'iam:CreateLoginProfile'
               - 'iam:DeleteAccessKey'
               - 'iam:DeleteLoginProfile'
-              - 'iam:GetAccountPasswordPolicy'
               - 'iam:GetLoginProfile'
               - 'iam:ListAccessKeys'
               - 'iam:UpdateAccessKey'
